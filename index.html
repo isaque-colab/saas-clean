@@ -253,6 +253,33 @@
       </footer>
     </div>
 
+    <button class="ai-launcher" type="button" aria-label="Abrir assistente IA">
+      <span class="ai-launcher__icon">🤖</span>
+      <span>IA Premium</span>
+    </button>
+
+    <aside class="ai-chat" id="ai-chat" aria-live="polite" aria-label="Assistente de IA">
+      <header class="ai-chat__header">
+        <div>
+          <strong>Fluxo IA</strong>
+          <small>Assistente premium</small>
+        </div>
+        <button type="button" class="ai-chat__close" id="ai-close" aria-label="Fechar assistente">✕</button>
+      </header>
+
+      <div class="ai-chat__messages" id="ai-messages">
+        <div class="ai-message ai-message--bot">
+          Olá! Posso ajudar com finanças, vendas, onboarding e planejamento do seu SaaS. Pergunte qualquer coisa.
+        </div>
+      </div>
+
+      <form id="ai-form" class="ai-chat__form">
+        <label class="sr-only" for="ai-input">Mensagem</label>
+        <input id="ai-input" name="message" type="text" placeholder="Pergunte à IA..." autocomplete="off" />
+        <button type="submit" class="btn btn-primary">Enviar</button>
+      </form>
+    </aside>
+
     <script src="script.js"></script>
   </body>
 </html>
