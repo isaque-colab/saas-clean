@@ -392,6 +392,7 @@ const createDemoAccount = async () => {
 const addTransaction = async (entry) => {
   if (dataMode === 'online') {
     const { error } = await supabaseClient.from('transactions').insert({
+      user_id: currentProfile.id,
       title: entry.title,
       category: entry.category,
       type: entry.type,
@@ -420,7 +421,12 @@ const removeTransaction = async (id) => {
 
 const addBudget = async (category, limit) => {
   if (dataMode === 'online') {
-    const { error } = await supabaseClient.from('budgets').insert({ category, limit_amount: limit, period_month: currentMonth() });
+    const { error } = await supabaseClient.from('budgets').insert({
+      user_id: currentProfile.id,
+      category,
+      limit_amount: limit,
+      period_month: currentMonth(),
+    });
     if (error) throw error;
     await loadUserData();
     return;
@@ -431,7 +437,13 @@ const addBudget = async (category, limit) => {
 
 const addGoal = async (title, target) => {
   if (dataMode === 'online') {
-    const { error } = await supabaseClient.from('goals').insert({ title, target, saved: 0, due: 'Sem prazo' });
+    const { error } = await supabaseClient.from('goals').insert({
+      user_id: currentProfile.id,
+      title,
+      target,
+      saved: 0,
+      due: 'Sem prazo',
+    });
     if (error) throw error;
     await loadUserData();
     return;
