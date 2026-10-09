@@ -32,6 +32,7 @@ let activeView = 'dashboard';
 let transactionFilter = '';
 let supabaseClient = null;
 let backendStatus = 'loading';
+let backendError = '';
 let authMode = 'signup';
 let isPasswordRecovery = false;
 let dataMode = 'demo';
@@ -128,8 +129,10 @@ const openAuth = (mode) => {
   document.getElementById('forgot-password').hidden = !isLogin || !supabaseClient;
   document.querySelector('.auth-divider').hidden = mode === 'reset-request' || mode === 'reset-password';
   document.querySelector('[data-demo-login]').hidden = mode === 'reset-request' || mode === 'reset-password';
-  if (!supabaseClient && backendStatus === 'missing') {
-    authMessage.textContent = 'Cadastro real ainda não está configurado. Use a demonstração ou configure Supabase no Netlify.';
+  if (!supabaseClient && backendStatus === 'invalid') {
+    authMessage.textContent = backendError;
+  } else if (!supabaseClient && backendStatus === 'missing') {
+    authMessage.textContent = backendError || 'Cadastro real ainda não está configurado. Use a demonstração ou configure Supabase no Netlify.';
   } else if (!supabaseClient && backendStatus === 'loading') {
     authMessage.textContent = 'Conectando ao serviço de contas...';
   }
@@ -191,9 +194,10 @@ const activateLiveUser = async (user) => {
 const initializeSupabase = async () => {
   try {
     const response = await fetch('/.netlify/functions/supabase-config', { cache: 'no-store' });
-    if (!response.ok) throw new Error('Supabase ainda não foi configurado.');
     const config = await response.json();
-    if (!config.configured || !config.url || !config.anonKey) throw new Error('Supabase ainda não foi configurado.');
+    if (!response.ok || !config.configured || !config.url || !config.anonKey) {
+      throw new Error(config.error || 'Supabase ainda não foi configurado.');
+    }
     const { createClient } = await import('https://esm.sh/@supabase/supabase-js@2');
     supabaseClient = createClient(config.url, config.anonKey, {
       auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true },
@@ -218,10 +222,14 @@ const initializeSupabase = async () => {
     if (error) throw error;
     if (data.session?.user && !isPasswordRecovery) await activateLiveUser(data.session.user);
   } catch (error) {
-    backendStatus = 'missing';
+    backendError = error.message;
+    backendStatus = /SUPABASE_URL|url válida|Project URL/i.test(error.message) ? 'invalid' : 'missing';
     document.getElementById('auth-copy').textContent = 'Crie uma conta para guardar seus dados online. A demonstração continua disponível.';
     document.getElementById('auth-notice').textContent = 'O cadastro online precisa ser ativado pelo administrador do site no Netlify e no Supabase.';
-    if (!authScreen.hidden) openAuth(authMode);
+    if (!authScreen.hidden) {
+      openAuth(authMode);
+      authMessage.textContent = backendError;
+    }
   }
 };
 
@@ -498,7 +506,7 @@ document.addEventListener('click', async (event) => {
 signupForm.addEventListener('submit', async (event) => {
   event.preventDefault();
   if (!supabaseClient) {
-    authMessage.textContent = 'O cadastro real ainda não foi ativado. Configure SUPABASE_URL e SUPABASE_ANON_KEY no Netlify.';
+    authMessage.textContent = backendError || 'O cadastro real ainda não foi ativado. Configure SUPABASE_URL e SUPABASE_ANON_KEY no Netlify.';
     return;
   }
 
@@ -535,7 +543,7 @@ signupForm.addEventListener('submit', async (event) => {
 loginForm.addEventListener('submit', async (event) => {
   event.preventDefault();
   if (!supabaseClient) {
-    authMessage.textContent = 'O login real ainda não foi ativado. Configure o Supabase no Netlify.';
+    authMessage.textContent = backendError || 'O login real ainda não foi ativado. Configure o Supabase no Netlify.';
     return;
   }
 
