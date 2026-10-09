@@ -49,10 +49,7 @@ const readStorage = (key, fallback) => {
   }
 };
 
-      if (event === 'PASSWORD_RECOVERY') {
-        isPasswordRecovery = true;
-        openAuth('reset-password');
-      }
+const writeStorage = (key, value) => localStorage.setItem(key, JSON.stringify(value));
 const getEmail = () => localStorage.getItem(storageKeys.session);
 const getProfile = () => currentProfile;
 const currentDate = () => {
@@ -498,8 +495,6 @@ document.addEventListener('click', async (event) => {
   }
 });
 
-document.getElementById('auth-switch').addEventListener('click', (event) => openAuth(event.currentTarget.dataset.screen));
-
 signupForm.addEventListener('submit', async (event) => {
   event.preventDefault();
   if (!supabaseClient) {
@@ -594,17 +589,6 @@ resetPasswordForm.addEventListener('submit', async (event) => {
 });
 
 document.getElementById('forgot-password').addEventListener('click', () => openAuth('reset-request'));
-
-document.querySelector('.lead-form').addEventListener('submit', (event) => {
-  event.preventDefault();
-  const name = document.getElementById('name').value.trim();
-  const email = document.getElementById('email').value.trim();
-  if (!name || !email) return;
-  openAuth('signup');
-  document.getElementById('signup-name').value = name;
-  document.getElementById('signup-email').value = email;
-  document.getElementById('signup-company').focus();
-});
 
 document.getElementById('transaction-form').addEventListener('submit', async (event) => {
   event.preventDefault();
