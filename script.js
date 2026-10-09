@@ -62,6 +62,31 @@ const currentMonth = () => {
   return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
 };
 const money = (value) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value || 0);
+const parseMoney = (value) => {
+  let normalized = String(value ?? '').trim().replace(/[^\d,.-]/g, '');
+  if (!normalized || !/\d/.test(normalized)) return Number.NaN;
+
+  const comma = normalized.lastIndexOf(',');
+  const dot = normalized.lastIndexOf('.');
+  if (comma >= 0 && dot >= 0) {
+    normalized = comma > dot
+      ? normalized.replace(/\./g, '').replace(',', '.')
+      : normalized.replace(/,/g, '');
+  } else if (comma >= 0) {
+    normalized = normalized.replace(/\./g, '').replace(',', '.');
+  } else {
+    const parts = normalized.split('.');
+    if (parts.length > 2) normalized = `${parts.slice(0, -1).join('')}.${parts.at(-1)}`;
+    else if (parts.length === 2 && parts[1].length === 3) normalized = parts.join('');
+  }
+
+  const amount = Number(normalized);
+  return Number.isFinite(amount) ? Math.round((amount + Number.EPSILON) * 100) / 100 : Number.NaN;
+};
+const moneyForEditing = (value) => new Intl.NumberFormat('pt-BR', {
+  minimumFractionDigits: 2,
+  maximumFractionDigits: 2,
+}).format(value);
 const escapeHtml = (value = '') => String(value).replace(/[&<>"']/g, (character) => ({
   '&': '&amp;',
   '<': '&lt;',
@@ -69,6 +94,21 @@ const escapeHtml = (value = '') => String(value).replace(/[&<>"']/g, (character)
   '"': '&quot;',
   "'": '&#39;',
 }[character]));
+
+document.addEventListener('focusin', (event) => {
+  if (!event.target.matches('[data-money-input]')) return;
+  const amount = parseMoney(event.target.value);
+  if (Number.isFinite(amount)) {
+    event.target.value = moneyForEditing(amount);
+    event.target.select();
+  }
+});
+
+document.addEventListener('focusout', (event) => {
+  if (!event.target.matches('[data-money-input]')) return;
+  const amount = parseMoney(event.target.value);
+  if (Number.isFinite(amount)) event.target.value = money(amount);
+});
 
 const transactionsForUser = () => transactionData;
 const budgetsForUser = () => budgetData.map((budget) => {
@@ -306,7 +346,7 @@ const budgetsView = () => {
     const percent = Math.min(100, Math.round((budget.spent / budget.limit) * 100));
     return `<article class="app-panel budget-card"><div class="budget-card-heading"><span class="category-symbol">${escapeHtml(budget.category.slice(0, 1))}</span><button class="icon-button" aria-label="Mais opções" type="button">···</button></div><span class="muted-copy">${escapeHtml(budget.category)}</span><strong>${money(budget.spent)} <small>de ${money(budget.limit)}</small></strong><div class="progress-track ${percent > 90 ? 'over-limit' : ''}"><span style="width:${percent}%"></span></div><div class="budget-line-head"><small>${percent}% utilizado</small><small>${money(Math.max(0, budget.limit - budget.spent))} restante</small></div></article>`;
   }).join('') : '<p class="app-panel empty-state">Você ainda não tem orçamentos neste mês.</p>'}</section>
-  <section class="app-panel create-panel"><div><h3>Novo orçamento</h3><p>Adicione um limite para outra categoria.</p></div><form id="budget-form" class="inline-form"><label class="sr-only" for="budget-category">Categoria</label><input id="budget-category" name="category" required maxlength="30" placeholder="Categoria" /><label class="sr-only" for="budget-limit">Limite mensal</label><input id="budget-limit" name="limit" type="number" min="1" step="0.01" required placeholder="Limite em R$" /><button class="btn btn-primary" type="submit">Adicionar</button></form></section>
+  <section class="app-panel create-panel"><div><h3>Novo orçamento</h3><p>Adicione um limite para outra categoria.</p></div><form id="budget-form" class="inline-form"><label class="sr-only" for="budget-category">Categoria</label><input id="budget-category" name="category" required maxlength="30" placeholder="Categoria" /><label class="sr-only" for="budget-limit">Limite mensal em reais</label><input id="budget-limit" name="limit" type="text" inputmode="decimal" data-money-input required placeholder="R$ 0,00" /><button class="btn btn-primary" type="submit">Adicionar</button></form></section>
 `;
 };
 
@@ -318,7 +358,7 @@ const goalsView = () => {
     const percent = Math.min(100, Math.round((goal.saved / goal.target) * 100));
     return `<article class="app-panel goal-card"><div class="goal-card-top"><span class="goal-icon">${index % 2 ? '↗' : '◎'}</span><span class="status-label">${escapeHtml(goal.due || 'Sem prazo')}</span></div><h3>${escapeHtml(goal.title)}</h3><p>Acumule recursos sem perder o controle do caixa.</p><div class="goal-progress-copy"><strong>${money(goal.saved)}</strong><span>${percent}%</span></div><div class="progress-track"><span style="width:${percent}%"></span></div><small>Meta de ${money(goal.target)}</small></article>`;
   }).join('') : '<p class="app-panel empty-state">Crie uma meta para acompanhar seu progresso.</p>'}</section>
-  <section class="app-panel create-panel"><div><h3>Criar meta</h3><p>Defina um objetivo e o valor desejado.</p></div><form id="goal-form" class="inline-form"><label class="sr-only" for="goal-title">Nome da meta</label><input id="goal-title" name="title" required maxlength="50" placeholder="Nome da meta" /><label class="sr-only" for="goal-target">Valor alvo</label><input id="goal-target" name="target" type="number" min="1" step="0.01" required placeholder="Valor alvo em R$" /><button class="btn btn-primary" type="submit">Criar meta</button></form></section>
+  <section class="app-panel create-panel"><div><h3>Criar meta</h3><p>Defina um objetivo e o valor desejado.</p></div><form id="goal-form" class="inline-form"><label class="sr-only" for="goal-title">Nome da meta</label><input id="goal-title" name="title" required maxlength="50" placeholder="Nome da meta" /><label class="sr-only" for="goal-target">Valor alvo em reais</label><input id="goal-target" name="target" type="text" inputmode="decimal" data-money-input required placeholder="R$ 0,00" /><button class="btn btn-primary" type="submit">Criar meta</button></form></section>
 `;
 };
 
@@ -396,7 +436,7 @@ const addTransaction = async (entry) => {
       title: entry.title,
       category: entry.category,
       type: entry.type,
-      amount: Number(entry.amount),
+      amount: parseMoney(entry.amount),
       date: entry.date,
     });
     if (error) throw error;
@@ -404,7 +444,7 @@ const addTransaction = async (entry) => {
     return;
   }
 
-  transactionData.unshift({ ...entry, id: crypto.randomUUID(), amount: Number(entry.amount) });
+  transactionData.unshift({ ...entry, id: crypto.randomUUID(), amount: parseMoney(entry.amount) });
   saveDemoData(storageKeys.transactions, transactionData);
 };
 
@@ -613,6 +653,14 @@ document.getElementById('forgot-password').addEventListener('click', () => openA
 document.getElementById('transaction-form').addEventListener('submit', async (event) => {
   event.preventDefault();
   const entry = Object.fromEntries(new FormData(event.currentTarget));
+  const amount = parseMoney(entry.amount);
+  if (!Number.isFinite(amount) || amount <= 0) {
+    const input = document.getElementById('entry-amount');
+    input.setCustomValidity('Informe um valor em reais maior que zero.');
+    input.reportValidity();
+    return;
+  }
+  entry.amount = amount;
   const button = event.currentTarget.querySelector('button[type="submit"]');
   button.disabled = true;
   try {
@@ -642,8 +690,15 @@ appContent.addEventListener('submit', async (event) => {
   const formData = Object.fromEntries(new FormData(event.target));
 
   if (event.target.id === 'budget-form') {
+    const limit = parseMoney(formData.limit);
+    if (!Number.isFinite(limit) || limit <= 0) {
+      const input = document.getElementById('budget-limit');
+      input.setCustomValidity('Informe um limite em reais maior que zero.');
+      input.reportValidity();
+      return;
+    }
     try {
-      await addBudget(formData.category.trim(), Number(formData.limit));
+      await addBudget(formData.category.trim(), limit);
       renderApp();
     } catch (error) {
       event.target.insertAdjacentHTML('beforeend', `<p class="form-message">${escapeHtml(error.message)}</p>`);
@@ -651,8 +706,15 @@ appContent.addEventListener('submit', async (event) => {
   }
 
   if (event.target.id === 'goal-form') {
+    const target = parseMoney(formData.target);
+    if (!Number.isFinite(target) || target <= 0) {
+      const input = document.getElementById('goal-target');
+      input.setCustomValidity('Informe um valor de meta em reais maior que zero.');
+      input.reportValidity();
+      return;
+    }
     try {
-      await addGoal(formData.title.trim(), Number(formData.target));
+      await addGoal(formData.title.trim(), target);
       renderApp();
     } catch (error) {
       event.target.insertAdjacentHTML('beforeend', `<p class="form-message">${escapeHtml(error.message)}</p>`);
@@ -678,6 +740,10 @@ appContent.addEventListener('submit', async (event) => {
       document.getElementById('settings-message').textContent = authErrorMessage(error);
     }
   }
+});
+
+document.addEventListener('input', (event) => {
+  if (event.target.matches('[data-money-input]')) event.target.setCustomValidity('');
 });
 
 const savedTheme = localStorage.getItem(storageKeys.theme);

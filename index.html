@@ -259,7 +259,7 @@
         <div class="dialog-heading"><div><span class="eyebrow">Financeiro</span><h2>Novo lançamento</h2></div><button class="icon-button" type="button" data-close-dialog aria-label="Fechar">×</button></div>
         <label for="entry-title">Descrição</label><input id="entry-title" name="title" required maxlength="80" placeholder="Ex.: Assinatura mensal" />
         <div class="form-grid"><div><label for="entry-type">Tipo</label><select id="entry-type" name="type"><option value="expense">Despesa</option><option value="income">Receita</option></select></div><div><label for="entry-category">Categoria</label><select id="entry-category" name="category"><option>Operação</option><option>Vendas</option><option>Marketing</option><option>Pessoal</option><option>Infraestrutura</option><option>Outros</option></select></div></div>
-        <div class="form-grid"><div><label for="entry-amount">Valor (R$)</label><input id="entry-amount" name="amount" type="number" min="0.01" step="0.01" required placeholder="0,00" /></div><div><label for="entry-date">Data</label><input id="entry-date" name="date" type="date" required /></div></div>
+        <div class="form-grid"><div><label for="entry-amount">Valor</label><input id="entry-amount" name="amount" type="text" inputmode="decimal" data-money-input required placeholder="R$ 0,00" /></div><div><label for="entry-date">Data</label><input id="entry-date" name="date" type="date" required /></div></div>
         <p class="form-message" id="transaction-message" role="status"></p>
         <button class="btn btn-primary auth-submit" type="submit">Salvar lançamento</button>
       </form>
