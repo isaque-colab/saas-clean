@@ -16,7 +16,7 @@ create table if not exists public.budgets (
   user_id uuid not null references auth.users (id) on delete cascade,
   category text not null check (char_length(category) between 1 and 40),
   limit_amount numeric(14, 2) not null check (limit_amount > 0),
-  period_month text not null check (period_month ~ '^\\d{4}-\\d{2}$'),
+  period_month text not null check (period_month ~ '^[0-9]{4}-(0[1-9]|1[0-2])$'),
   created_at timestamptz not null default now(),
   unique (user_id, category, period_month)
 );
