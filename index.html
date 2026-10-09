@@ -34,8 +34,8 @@
             <button class="theme-toggle" aria-label="Alternar tema">
               <span class="theme-toggle__icon">☀️</span>
             </button>
-            <a class="btn btn-ghost" href="#contato">Demo</a>
-            <a class="btn btn-primary" href="#contato">Começar</a>
+            <button class="btn btn-ghost" type="button" data-screen="login">Entrar</button>
+            <button class="btn btn-primary" type="button" data-screen="signup">Criar conta</button>
           </div>
         </div>
       </header>
@@ -51,7 +51,7 @@
                 que conversa com a operação da sua empresa em tempo real.
               </p>
               <div class="cta-row">
-                <a class="btn btn-primary" href="#contato">Solicitar acesso</a>
+                <button class="btn btn-primary" type="button" data-screen="signup">Criar conta</button>
                 <a class="btn btn-secondary" href="#produto">Ver demonstração</a>
               </div>
               <ul class="hero-meta" aria-label="Benefícios principais">
@@ -253,32 +253,72 @@
       </footer>
     </div>
 
-    <button class="ai-launcher" type="button" aria-label="Abrir assistente IA">
-      <span class="ai-launcher__icon">🤖</span>
-      <span>IA Premium</span>
-    </button>
+    <main class="auth-screen" id="auth-screen" hidden>
+      <button class="auth-back" type="button" data-screen="landing">← Voltar ao site</button>
+      <section class="auth-panel" aria-labelledby="auth-title">
+        <div class="brand auth-brand"><span class="brand-mark">F</span><span>Fluxo</span></div>
+        <span class="eyebrow">Acesso de demonstração</span>
+        <h1 id="auth-title">Crie seu espaço financeiro.</h1>
+        <p class="auth-copy">Teste as telas e os recursos do Fluxo neste navegador. Este protótipo não cria uma conta online.</p>
+        <form id="signup-form" class="auth-form" hidden>
+          <label for="signup-name">Seu nome</label>
+          <input id="signup-name" name="name" autocomplete="name" required placeholder="Ex.: Ana Silva" />
+          <label for="signup-email">E-mail</label>
+          <input id="signup-email" name="email" type="email" autocomplete="email" required placeholder="voce@empresa.com" />
+          <label for="signup-company">Empresa ou workspace</label>
+          <input id="signup-company" name="company" autocomplete="organization" placeholder="Nome da empresa" />
+          <button class="btn btn-primary auth-submit" type="submit">Criar espaço de demonstração</button>
+        </form>
+        <form id="login-form" class="auth-form" hidden>
+          <label for="login-email">E-mail usado no cadastro neste navegador</label>
+          <input id="login-email" name="email" type="email" autocomplete="email" required placeholder="voce@empresa.com" />
+          <button class="btn btn-primary auth-submit" type="submit">Abrir meu espaço</button>
+        </form>
+        <div class="auth-divider"><span>ou</span></div>
+        <button class="btn btn-secondary auth-submit" type="button" data-demo-login>Explorar demonstração</button>
+        <p class="auth-switch" id="auth-switch-copy"></p>
+        <button class="text-button" id="auth-switch" type="button"></button>
+        <p class="auth-notice" role="note">Os dados ficam somente no armazenamento local deste navegador. Não use dados financeiros reais.</p>
+        <p class="form-message" id="auth-message" role="status"></p>
+      </section>
+    </main>
 
-    <aside class="ai-chat" id="ai-chat" aria-live="polite" aria-label="Assistente de IA">
-      <header class="ai-chat__header">
-        <div>
-          <strong>Fluxo IA</strong>
-          <small>Assistente premium</small>
+    <div class="app-shell" id="app-shell" hidden>
+      <aside class="app-sidebar">
+        <a class="brand app-brand" href="#" data-view="dashboard"><span class="brand-mark">F</span><span>Fluxo</span></a>
+        <div class="workspace-switcher"><span class="workspace-avatar">F</span><span><strong id="workspace-name">Meu espaço</strong><small>Plano demonstração</small></span><span aria-hidden="true">⌄</span></div>
+        <span class="sidebar-label">MENU</span>
+        <nav class="app-nav" aria-label="Menu financeiro">
+          <button class="app-nav-link is-active" type="button" data-view="dashboard"><span>◫</span>Visão geral</button>
+          <button class="app-nav-link" type="button" data-view="transactions"><span>↔</span>Lançamentos</button>
+          <button class="app-nav-link" type="button" data-view="budgets"><span>▤</span>Orçamentos</button>
+          <button class="app-nav-link" type="button" data-view="goals"><span>◎</span>Metas</button>
+          <button class="app-nav-link" type="button" data-view="reports"><span>⌁</span>Relatórios</button>
+        </nav>
+        <div class="sidebar-bottom">
+          <button class="app-nav-link" type="button" data-view="settings"><span>⚙</span>Configurações</button>
+          <div class="sidebar-user"><span class="user-avatar" id="user-avatar">U</span><span><strong id="user-name">Usuário</strong><small id="user-email">demo@fluxo.local</small></span><button type="button" class="icon-button" data-logout aria-label="Sair">↗</button></div>
         </div>
-        <button type="button" class="ai-chat__close" id="ai-close" aria-label="Fechar assistente">✕</button>
-      </header>
+      </aside>
 
-      <div class="ai-chat__messages" id="ai-messages">
-        <div class="ai-message ai-message--bot">
-          Olá! Posso ajudar com finanças, vendas, onboarding e planejamento do seu SaaS. Pergunte qualquer coisa.
-        </div>
-      </div>
+      <section class="app-main">
+        <header class="app-topbar">
+          <div><span class="app-breadcrumb">Workspace / <strong id="current-section-name">Visão geral</strong></span><h1 id="app-page-title">Visão geral</h1></div>
+          <div class="app-top-actions"><span class="demo-pill">● DEMO LOCAL</span><button class="theme-toggle" type="button" aria-label="Alternar tema"><span class="theme-toggle__icon">☀️</span></button><button class="btn btn-primary" type="button" data-add-transaction>＋ Novo lançamento</button></div>
+        </header>
+        <div class="app-content" id="app-content"></div>
+      </section>
+    </div>
 
-      <form id="ai-form" class="ai-chat__form">
-        <label class="sr-only" for="ai-input">Mensagem</label>
-        <input id="ai-input" name="message" type="text" placeholder="Pergunte à IA..." autocomplete="off" />
-        <button type="submit" class="btn btn-primary">Enviar</button>
+    <dialog class="entry-dialog" id="transaction-dialog">
+      <form id="transaction-form" method="dialog">
+        <div class="dialog-heading"><div><span class="eyebrow">Financeiro</span><h2>Novo lançamento</h2></div><button class="icon-button" type="button" data-close-dialog aria-label="Fechar">×</button></div>
+        <label for="entry-title">Descrição</label><input id="entry-title" name="title" required maxlength="80" placeholder="Ex.: Assinatura mensal" />
+        <div class="form-grid"><div><label for="entry-type">Tipo</label><select id="entry-type" name="type"><option value="expense">Despesa</option><option value="income">Receita</option></select></div><div><label for="entry-category">Categoria</label><select id="entry-category" name="category"><option>Operação</option><option>Vendas</option><option>Marketing</option><option>Pessoal</option><option>Infraestrutura</option><option>Outros</option></select></div></div>
+        <div class="form-grid"><div><label for="entry-amount">Valor (R$)</label><input id="entry-amount" name="amount" type="number" min="0.01" step="0.01" required placeholder="0,00" /></div><div><label for="entry-date">Data</label><input id="entry-date" name="date" type="date" required /></div></div>
+        <button class="btn btn-primary auth-submit" type="submit">Salvar lançamento</button>
       </form>
-    </aside>
+    </dialog>
 
     <script src="script.js"></script>
   </body>

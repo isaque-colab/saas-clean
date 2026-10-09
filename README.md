@@ -1,33 +1,34 @@
 # Fluxo
 
-Landing page estática para o SaaS de finanças e controle financeiro da Fluxo.
+Protótipo navegável de um SaaS de finanças, com landing page e área demonstrativa para gestão financeira.
 
-## Como rodar localmente
+## Executar localmente
 
-```bash
-python -m http.server 8080
+Requer Python 3 instalado. Na pasta do projeto, execute:
+
+```powershell
+python -m http.server 8090
 ```
 
-Depois abra:
+Abra `http://localhost:8090` no navegador.
 
-```text
-http://localhost:8080
-```
+## Telas
 
-## Deploy no Netlify
+- Landing page e preços
+- Cadastro e login demonstrativos
+- Visão geral do fluxo financeiro
+- Lançamentos com inclusão, busca e remoção
+- Orçamentos por categoria
+- Metas financeiras
+- Relatórios e configurações
+- Tema claro/escuro
 
-1. Conecte o repositório no Netlify.
-2. Configure a pasta de publicação como a raiz do projeto.
-3. Use a configuração presente em `netlify.toml`.
-4. Faça o deploy.
+## Dados e autenticação
 
-## Estrutura
+O cadastro deste protótipo é local ao navegador e não usa senha, servidor ou banco de dados. Os dados são guardados em `localStorage`, não sincronizam entre dispositivos e não devem conter informações financeiras reais. O botão de demonstração cria um perfil de exemplo local.
 
-- `index.html` — landing page principal
-- `styles.css` — visual dark/light
-- `script.js` — tema e interações
-- `netlify.toml` — configuração de deploy
+Para vender o produto ou criar contas reais, ainda é necessário implementar autenticação segura, API/backend, banco de dados, autorização por usuário e recuperação de senha. O HTML estático sozinho não fornece esses serviços.
 
-## Observação
+## Deploy Netlify
 
-Este projeto foi estruturado como landing page estática para publicação em Netlify. A versão full SaaS com backend e autenticação pode ser adicionada em seguida.
+O `netlify.toml` publica a raiz como site estático. Isso disponibiliza a landing e o protótipo; não transforma o cadastro local em autenticação de produção.
