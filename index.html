@@ -257,9 +257,9 @@
       <button class="auth-back" type="button" data-screen="landing">← Voltar ao site</button>
       <section class="auth-panel" aria-labelledby="auth-title">
         <div class="brand auth-brand"><span class="brand-mark">F</span><span>Fluxo</span></div>
-        <span class="eyebrow">Acesso de demonstração</span>
+        <span class="eyebrow">Conta Fluxo</span>
         <h1 id="auth-title">Crie seu espaço financeiro.</h1>
-        <p class="auth-copy">Teste as telas e os recursos do Fluxo neste navegador. Este protótipo não cria uma conta online.</p>
+        <p class="auth-copy" id="auth-copy">Crie uma conta para acessar seus dados financeiros com segurança.</p>
         <form id="signup-form" class="auth-form" hidden>
           <label for="signup-name">Seu nome</label>
           <input id="signup-name" name="name" autocomplete="name" required placeholder="Ex.: Ana Silva" />
@@ -267,18 +267,38 @@
           <input id="signup-email" name="email" type="email" autocomplete="email" required placeholder="voce@empresa.com" />
           <label for="signup-company">Empresa ou workspace</label>
           <input id="signup-company" name="company" autocomplete="organization" placeholder="Nome da empresa" />
-          <button class="btn btn-primary auth-submit" type="submit">Criar espaço de demonstração</button>
+          <label for="signup-password">Senha (mínimo 10 caracteres)</label>
+          <input id="signup-password" name="password" type="password" autocomplete="new-password" minlength="10" required />
+          <label for="signup-password-confirm">Confirme sua senha</label>
+          <input id="signup-password-confirm" name="passwordConfirm" type="password" autocomplete="new-password" minlength="10" required />
+          <button class="btn btn-primary auth-submit" type="submit">Criar conta</button>
         </form>
         <form id="login-form" class="auth-form" hidden>
-          <label for="login-email">E-mail usado no cadastro neste navegador</label>
+          <label for="login-email">E-mail</label>
           <input id="login-email" name="email" type="email" autocomplete="email" required placeholder="voce@empresa.com" />
-          <button class="btn btn-primary auth-submit" type="submit">Abrir meu espaço</button>
+          <label for="login-password">Senha</label>
+          <input id="login-password" name="password" type="password" autocomplete="current-password" required />
+          <button class="btn btn-primary auth-submit" type="submit">Entrar</button>
+        </form>
+        <form id="reset-request-form" class="auth-form" hidden>
+          <label for="reset-email">E-mail da conta</label>
+          <input id="reset-email" name="email" type="email" autocomplete="email" required placeholder="voce@empresa.com" />
+          <button class="btn btn-primary auth-submit" type="submit">Enviar link de recuperação</button>
+          <button class="text-button auth-back-to-login" type="button" data-screen="login">Voltar ao login</button>
+        </form>
+        <form id="reset-password-form" class="auth-form" hidden>
+          <label for="new-password">Nova senha (mínimo 10 caracteres)</label>
+          <input id="new-password" name="password" type="password" autocomplete="new-password" minlength="10" required />
+          <label for="new-password-confirm">Confirme a nova senha</label>
+          <input id="new-password-confirm" name="passwordConfirm" type="password" autocomplete="new-password" minlength="10" required />
+          <button class="btn btn-primary auth-submit" type="submit">Salvar nova senha</button>
         </form>
         <div class="auth-divider"><span>ou</span></div>
         <button class="btn btn-secondary auth-submit" type="button" data-demo-login>Explorar demonstração</button>
+        <button class="text-button forgot-password" id="forgot-password" type="button">Esqueci minha senha</button>
         <p class="auth-switch" id="auth-switch-copy"></p>
         <button class="text-button" id="auth-switch" type="button"></button>
-        <p class="auth-notice" role="note">Os dados ficam somente no armazenamento local deste navegador. Não use dados financeiros reais.</p>
+        <p class="auth-notice" id="auth-notice" role="note">Sua conta e seus dados são armazenados com segurança.</p>
         <p class="form-message" id="auth-message" role="status"></p>
       </section>
     </main>
@@ -286,7 +306,7 @@
     <div class="app-shell" id="app-shell" hidden>
       <aside class="app-sidebar">
         <a class="brand app-brand" href="#" data-view="dashboard"><span class="brand-mark">F</span><span>Fluxo</span></a>
-        <div class="workspace-switcher"><span class="workspace-avatar">F</span><span><strong id="workspace-name">Meu espaço</strong><small>Plano demonstração</small></span><span aria-hidden="true">⌄</span></div>
+        <div class="workspace-switcher"><span class="workspace-avatar">F</span><span><strong id="workspace-name">Meu espaço</strong><small id="workspace-plan">Plano gratuito</small></span><span aria-hidden="true">⌄</span></div>
         <span class="sidebar-label">MENU</span>
         <nav class="app-nav" aria-label="Menu financeiro">
           <button class="app-nav-link is-active" type="button" data-view="dashboard"><span>◫</span>Visão geral</button>
@@ -304,7 +324,7 @@
       <section class="app-main">
         <header class="app-topbar">
           <div><span class="app-breadcrumb">Workspace / <strong id="current-section-name">Visão geral</strong></span><h1 id="app-page-title">Visão geral</h1></div>
-          <div class="app-top-actions"><span class="demo-pill">● DEMO LOCAL</span><button class="theme-toggle" type="button" aria-label="Alternar tema"><span class="theme-toggle__icon">☀️</span></button><button class="btn btn-primary" type="button" data-add-transaction>＋ Novo lançamento</button></div>
+          <div class="app-top-actions"><span class="demo-pill" id="environment-badge">● DEMO LOCAL</span><button class="theme-toggle" type="button" aria-label="Alternar tema"><span class="theme-toggle__icon">☀️</span></button><button class="btn btn-primary" type="button" data-add-transaction>＋ Novo lançamento</button></div>
         </header>
         <div class="app-content" id="app-content"></div>
       </section>
@@ -316,10 +336,11 @@
         <label for="entry-title">Descrição</label><input id="entry-title" name="title" required maxlength="80" placeholder="Ex.: Assinatura mensal" />
         <div class="form-grid"><div><label for="entry-type">Tipo</label><select id="entry-type" name="type"><option value="expense">Despesa</option><option value="income">Receita</option></select></div><div><label for="entry-category">Categoria</label><select id="entry-category" name="category"><option>Operação</option><option>Vendas</option><option>Marketing</option><option>Pessoal</option><option>Infraestrutura</option><option>Outros</option></select></div></div>
         <div class="form-grid"><div><label for="entry-amount">Valor (R$)</label><input id="entry-amount" name="amount" type="number" min="0.01" step="0.01" required placeholder="0,00" /></div><div><label for="entry-date">Data</label><input id="entry-date" name="date" type="date" required /></div></div>
+        <p class="form-message" id="transaction-message" role="status"></p>
         <button class="btn btn-primary auth-submit" type="submit">Salvar lançamento</button>
       </form>
     </dialog>
 
-    <script src="script.js"></script>
+    <script type="module" src="script.js"></script>
   </body>
 </html>

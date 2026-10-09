@@ -5,8 +5,9 @@ Fluxo é um protótipo navegável de SaaS financeiro com landing page e área de
 
 ## Estado atual
 - Landing page estática pronta para Netlify.
-- Painel demonstrativo com dashboard, lançamentos, orçamentos, metas, relatórios e configurações.
-- Cadastro/login de demonstração e dados locais em `localStorage`; não é autenticação de produção.
+- Painel com dashboard, lançamentos, orçamentos, metas, relatórios e configurações.
+- Cadastro/login online integrado a Supabase Auth e persistência em Postgres com RLS, condicionado a configuração do projeto Supabase e variáveis no Netlify.
+- Modo de demonstração separado usando `localStorage`; não é autenticação de produção e não deve receber dados reais.
 - Tema dark/light.
 - Configuração de deploy em `netlify.toml`.
 
@@ -15,6 +16,9 @@ Fluxo é um protótipo navegável de SaaS financeiro com landing page e área de
 - `styles.css`: visual e responsividade
 - `script.js`: comportamento interativo
 - `netlify.toml`: configuração do Netlify
+- `netlify/functions/supabase-config.js`: publica somente a URL e a chave pública configuradas no ambiente Netlify
+- `supabase/schema.sql`: tabelas financeiras e políticas de isolamento por usuário
+- `.env.example`: nomes das variáveis para desenvolvimento local
 - `README.md`: instruções de uso
 
 ## Como testar localmente
@@ -24,5 +28,6 @@ python -m http.server 8090
 Acesse `http://localhost:8090`.
 
 ## Observações
-- Não inserir dados financeiros reais no protótipo local.
-- Para contas reais e sincronização multi-dispositivo, implementar backend, autenticação segura e banco de dados.
+- Configure `SUPABASE_URL` e `SUPABASE_ANON_KEY` no Netlify e execute `supabase/schema.sql` antes de liberar cadastro real.
+- Nunca colocar chave `service_role` ou outros segredos no cliente.
+- Sem Supabase configurado, o site oferece somente demonstração local.
