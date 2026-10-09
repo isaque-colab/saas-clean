@@ -40,6 +40,8 @@ let currentProfile = null;
 let transactionData = [];
 let budgetData = [];
 let goalData = [];
+let realtimeChannel = null;
+let realtimeRefreshTimer = null;
 
 const readStorage = (key, fallback) => {
   try {
@@ -220,6 +222,52 @@ const loadUserData = async () => {
   [transactionData, budgetData, goalData] = results.map((result) => result.data || []);
 };
 
+const stopLiveUpdates = () => {
+  if (realtimeRefreshTimer) window.clearTimeout(realtimeRefreshTimer);
+  realtimeRefreshTimer = null;
+  if (realtimeChannel && supabaseClient) supabaseClient.removeChannel(realtimeChannel);
+  realtimeChannel = null;
+};
+
+const subscribeToLiveUpdates = (userId) => {
+  stopLiveUpdates();
+  const tables = ['transactions', 'budgets', 'goals'];
+  const channel = supabaseClient.channel(`finance-${userId}`);
+
+  tables.forEach((table) => {
+    channel.on('postgres_changes', {
+      event: '*',
+      schema: 'public',
+      table,
+      filter: `user_id=eq.${userId}`,
+    }, () => {
+      if (realtimeRefreshTimer) window.clearTimeout(realtimeRefreshTimer);
+      realtimeRefreshTimer = window.setTimeout(async () => {
+        if (dataMode !== 'online' || currentProfile?.id !== userId) return;
+        try {
+          await loadUserData();
+          if (!appShell.hidden) renderApp();
+        } catch {
+          const badge = document.getElementById('environment-badge');
+          if (badge) badge.textContent = '● SINCRONIZAÇÃO PENDENTE';
+        }
+      }, 180);
+    });
+  });
+
+  realtimeChannel = channel.subscribe((status) => {
+    const badge = document.getElementById('environment-badge');
+    if (!badge || dataMode !== 'online') return;
+    if (status === 'SUBSCRIBED') {
+      badge.textContent = '● AO VIVO';
+      badge.classList.remove('sync-pending');
+    } else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
+      badge.textContent = '● SEM TEMPO REAL';
+      badge.classList.add('sync-pending');
+    }
+  });
+};
+
 const activateLiveUser = async (user) => {
   dataMode = 'online';
   currentProfile = {
@@ -229,6 +277,7 @@ const activateLiveUser = async (user) => {
     email: user.email || '',
   };
   await showApp();
+  subscribeToLiveUpdates(user.id);
 };
 
 const initializeSupabase = async () => {
@@ -248,6 +297,7 @@ const initializeSupabase = async () => {
     supabaseClient.auth.onAuthStateChange((event, session) => {
       if (event === 'PASSWORD_RECOVERY') openAuth('reset-password');
       if (event === 'SIGNED_OUT' && dataMode === 'online') {
+        stopLiveUpdates();
         currentProfile = null;
         transactionData = [];
         budgetData = [];

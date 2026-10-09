@@ -39,6 +39,28 @@ alter table public.transactions enable row level security;
 alter table public.budgets enable row level security;
 alter table public.goals enable row level security;
 
+do $$
+declare
+  table_name text;
+begin
+  if not exists (select 1 from pg_publication where pubname = 'supabase_realtime') then
+    raise exception 'Supabase Realtime publication was not found';
+  end if;
+
+  foreach table_name in array array['transactions', 'budgets', 'goals'] loop
+    if not exists (
+      select 1
+      from pg_publication_tables publication_table
+      where publication_table.pubname = 'supabase_realtime'
+        and publication_table.schemaname = 'public'
+        and publication_table.tablename = table_name
+    ) then
+      execute format('alter publication supabase_realtime add table public.%I', table_name);
+    end if;
+  end loop;
+end;
+$$;
+
 grant usage on schema public to authenticated;
 grant select, insert, update, delete on public.transactions to authenticated;
 grant select, insert, update, delete on public.budgets to authenticated;

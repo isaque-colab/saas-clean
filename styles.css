@@ -771,6 +771,16 @@ h1 {
   letter-spacing: 0.05em;
 }
 
+.demo-pill.live-pill {
+  color: var(--success);
+  background: rgba(16, 185, 129, 0.12);
+}
+
+.demo-pill.sync-pending {
+  color: #b45309;
+  background: rgba(245, 158, 11, 0.12);
+}
+
 .app-content {
   width: min(1440px, 100%);
   margin: 0 auto;
